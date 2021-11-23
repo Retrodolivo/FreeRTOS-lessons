@@ -98,8 +98,9 @@ int main(void)
   /*Enable the CYCNT counter*/
   DWT_CTRL |= (1<<0);
 
+  SEGGER_UART_init(500000);
+
   SEGGER_SYSVIEW_Conf();
-  SEGGER_SYSVIEW_Start();
 
   status = xTaskCreate(task1_handler, "Task-1", 200, "Hello world from Task-1", 2, &task1_handle);
   configASSERT(status = pdPASS);
@@ -145,8 +146,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 50;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
+  RCC_OscInitStruct.PLL.PLLN = 168;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 7;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -161,7 +162,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
   {
     Error_Handler();
   }
@@ -308,17 +309,25 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 static void task1_handler(void *parameters)
 {
+	char msg[100];
+
 	while(1)
 	{
-		printf("%s\n", (char *) parameters);
+		snprintf(msg, 100, "%s\n", (char *)parameters);
+		SEGGER_SYSVIEW_PrintfTarget(msg);
+		taskYIELD();
 	}
 }
 
 static void task2_handler(void *parameters)
 {
+	char msg[100];
+
 	while(1)
 	{
-		printf("%s\n", (char *) parameters);
+		snprintf(msg, 100, "%s\n", (char *)parameters);
+		SEGGER_SYSVIEW_PrintfTarget(msg);
+		taskYIELD();
 	}
 }
 /* USER CODE END 4 */
